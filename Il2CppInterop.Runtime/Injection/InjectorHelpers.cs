@@ -98,6 +98,12 @@ namespace Il2CppInterop.Runtime.Injection
             {
                 s_ClassNameLookup.Add((namespaze, klass, image), typePointer);
             }
+            s_TypeLookup[typePointer] = type;
+        }
+
+        internal static bool TryGetType(IntPtr typePointer, out Type type)
+        {
+            return s_TypeLookup.TryGetValue(typePointer, out type);
         }
 
         internal static IntPtr GetIl2CppExport(string name)
@@ -137,6 +143,7 @@ namespace Il2CppInterop.Runtime.Injection
         internal static readonly ConcurrentDictionary<long, IntPtr> s_InjectedClasses = new();
         /// <summary> (namespace, class, image) : class </summary>
         internal static readonly Dictionary<(string _namespace, string _class, IntPtr imagePtr), IntPtr> s_ClassNameLookup = new();
+        internal static readonly Dictionary<IntPtr, Type> s_TypeLookup = new();
 
         #region Class::Init
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]

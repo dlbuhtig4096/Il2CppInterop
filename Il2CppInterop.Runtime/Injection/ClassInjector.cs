@@ -412,6 +412,8 @@ public static unsafe partial class ClassInjector
 
             var methodName = Marshal.PtrToStringAnsi(baseMethod.Name);
 
+            Logger.Instance.LogInformation("Processing {type}::{methodName}", type, methodName);
+
             if (methodName == "Finalize") // slot number is not static
             {
                 vTablePointer[i].method = methodPointerArray[0];
@@ -1138,8 +1140,13 @@ public static unsafe partial class ClassInjector
 
     internal static Type SystemTypeFromIl2CppType(Il2CppTypeStruct* typePointer)
     {
-        var fullName = GetIl2CppTypeFullName(typePointer);
-        var type = Type.GetType(fullName) ?? throw new NullReferenceException($"Couldn't find System.Type for Il2Cpp type: {fullName}");
+        var il2cppType = UnityVersionHandler.Wrap(typePointer);
+
+        if (!InjectorHelpers.TryGetType((IntPtr)il2cppType.TypePointer, out var type))
+        {
+            var fullName = GetIl2CppTypeFullName(typePointer);
+            type = Type.GetType(fullName) ?? throw new NullReferenceException($"Couldn't find System.Type for Il2Cpp type: {fullName}");
+        }
         return RewriteType(type);
     }
 
